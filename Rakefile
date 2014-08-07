@@ -1,10 +1,16 @@
-require 'bundler'
-Bundler::GemHelper.install_tasks
-require "rspec/core/rake_task" 
+$:.unshift("/Library/RubyMotion/lib")
+require 'motion/project/template/ios'
 
-RSpec::Core::RakeTask.new(:rspec) do |spec|
-  spec.pattern = 'spec/**/*_spec.rb'
-  spec.rspec_opts = ['-cfs --backtrace']
+begin
+  require 'bundler'
+  Bundler.require
+rescue LoadError
 end
 
-task :default => :rspec
+Motion::Project::App.setup do |app|
+  # Use `rake config' to see complete project settings.
+  app.name = 'rotp-motion'
+
+  app.vendor_project('vendor/otp_generator', :static)
+  app.frameworks << 'Security'
+end

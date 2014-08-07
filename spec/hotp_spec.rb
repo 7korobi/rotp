@@ -1,43 +1,43 @@
-require 'spec_helper'
-
-describe ROTP::HOTP do
-  before(:all) { @counter = 1234 }
-
-  subject { ROTP::HOTP.new('a' * 32) }
+describe "ROTP::HOTP" do
+  before do
+    @counter = 1234
+    @subject = ROTP::HOTP.new('a' * 32)
+  end
 
   it "should generate a string OTP given a count" do
-    subject.at(@counter).should == "161024"
+    @subject.at(@counter).should == "161024"
   end
   it "should generate a number if padding is set to false" do
-    subject.at(@counter, false).should == 161024
+    @subject.at(@counter, false).should == 161024
   end
   it "should not verify a number" do
-    expect {
-      subject.verify(161024, @counter)
-    }.to raise_error
+    should.raise(ArgumentError) {
+      @subject.verify(161024, @counter)
+    }
   end
   it "should verify a string" do
-    subject.verify("161024", @counter).should be_true
+    @subject.verify("161024", @counter).should.be.true
   end
-  it "should output its provisioning URI" do
-    url = subject.provisioning_uri('mark@percival')
-    params = CGI::parse(URI::parse(url).query)
-    url.should match(/otpauth:\/\/hotp.+/)
-    params["secret"].first.should == "a" * 32
-  end
-
+  # it "should output its provisioning URI" do
+  #   url = @subject.provisioning_uri('mark@percival')
+  #   url.should match(/otpauth:\/\/hotp.+/)
+  #
+  #   params = CGI::parse(URI::parse(url).query)
+  #   params["secret"].first.should == "a" * 32
+  # end
+  #
   context "with retries" do
     it "should verify that retry is a valid number" do
-      subject.verify_with_retries("161024", @counter, -1).should be_false
-      subject.verify_with_retries("161024", @counter, 0).should be_false
+      @subject.verify_with_retries("161024", @counter, -1).should.be.false
+      @subject.verify_with_retries("161024", @counter, 0).should.be.false
     end
 
     it "should verify up to the total number of retries and return the counter" do
-      subject.verify_with_retries("161024", @counter - 10, 10).should == @counter
+      @subject.verify_with_retries("161024", @counter - 10, 10).should == @counter
     end
 
     it "should verify that retry is a valid number" do
-      subject.verify_with_retries("161024", @counter - 20, 10).should be_false
+      @subject.verify_with_retries("161024", @counter - 20, 10).should.be.false
     end
   end
 end
@@ -60,7 +60,7 @@ describe "HOTP example values from the rfc" do
   end
   it "should verify an OTP and not allow reuse" do
     hotp = ROTP::HOTP.new("GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ")
-    hotp.verify("520489", 9).should be_true
-    hotp.verify("520489", 10).should be_false
+    hotp.verify("520489", 9).should.be.true
+    hotp.verify("520489", 10).should.be.false
   end
 end

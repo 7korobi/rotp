@@ -1,16 +1,13 @@
-require File.dirname(__FILE__) + '/spec_helper'
-
 describe "the Base32 implementation" do
   it "should be 16 characters by default" do
     ROTP::Base32.random_base32.length.should == 16
-    ROTP::Base32.random_base32.should match /\A[a-z2-7]+\z/
+    ROTP::Base32.random_base32.should.match(/\A[a-z2-7]+\z/)
   end
   it "should be allow a specific length" do
     ROTP::Base32.random_base32(32).length.should == 32
   end
   it "raise a sane error on a bad decode" do
-    expect { ROTP::Base32.decode("4BCDEFG234BCDEF1") }.to \
-      raise_error(ROTP::Base32::Base32Error, "Invalid Base32 Character - '1'")
+    should.raise(ROTP::Base32::Base32Error) { ROTP::Base32.decode("4BCDEFG234BCDEF1") }
   end
   it "should correctly decode a string" do
     ROTP::Base32.decode("F").unpack('H*').first.should == "28"

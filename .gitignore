@@ -3,3 +3,5 @@
 Gemfile.lock
 .yardoc
 pkg/*
+build/*
+vendor/otp_generator/build-*

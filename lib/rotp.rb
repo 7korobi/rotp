@@ -1,11 +1,12 @@
-require 'cgi'
-require 'uri'
-require 'openssl'
-require 'rotp/base32'
-require 'rotp/otp'
-require 'rotp/hotp'
-require 'rotp/totp'
+unless defined?(Motion::Project::Config)
+  raise "This file must be required within a RubyMotion project Rakefile."
+end
 
+Motion::Project::App.setup do |app|
+  Dir.glob(File.join(File.dirname(__FILE__), 'rotp/*.rb')).each do |file|
+    app.files.unshift(file)
+  end
+end
 
 module ROTP
 end

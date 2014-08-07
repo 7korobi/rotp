@@ -21,21 +21,13 @@ module ROTP
     # Usually either the counter, or the computed integer
     # based on the Unix timestamp
     def generate_otp(input, padded=true)
-      hmac = OpenSSL::HMAC.digest(
-        OpenSSL::Digest.new(digest),
-        byte_secret,
-        int_to_bytestring(input)
-      )
+      key = byte_secret.unpack("H*").first
+      otp = OtpGenerator.generateWithDigest(@digest, key: key, input: input, digits: @digits)
 
-      offset = hmac[-1].ord & 0xf
-      code = (hmac[offset].ord & 0x7f) << 24 |
-        (hmac[offset + 1].ord & 0xff) << 16 |
-        (hmac[offset + 2].ord & 0xff) << 8 |
-        (hmac[offset + 3].ord & 0xff)
       if padded
-        (code % 10 ** digits).to_s.rjust(digits, '0')
+        otp
       else
-        code % 10 ** digits
+        otp.to_i
       end
     end
 
@@ -45,24 +37,11 @@ module ROTP
       unless input.is_a?(String) && generated.is_a?(String)
         raise ArgumentError, "ROTP only verifies strings - See: https://github.com/mdp/rotp/issues/32"
       end
-      time_constant_compare(input, generated)
+      input == generated
     end
 
     def byte_secret
       Base32.decode(@secret)
-    end
-
-    # Turns an integer to the OATH specified
-    # bytestring, which is fed to the HMAC
-    # along with the secret
-    #
-    def int_to_bytestring(int, padding = 8)
-      result = []
-      until int == 0
-        result << (int & 0xFF).chr
-        int >>=  8
-      end
-      result.reverse.join.rjust(padding, 0.chr)
     end
 
     # A very simple param encoder
@@ -75,17 +54,6 @@ module ROTP
       end
       params_str.chop!
       uri + params_str
-    end
-
-    private
-
-    # constant-time compare the strings
-    def time_constant_compare(a, b)
-      return false if a.empty? || b.empty? || a.bytesize != b.bytesize
-      l = a.unpack "C#{a.bytesize}"
-      res = 0
-      b.each_byte { |byte| res |= byte ^ l.shift }
-      res == 0
     end
 
   end
