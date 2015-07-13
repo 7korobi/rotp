@@ -57,7 +57,7 @@ static NSUInteger kPinModTable[] = {
   const char *ptr = [hash bytes];
   unsigned char offset = ptr[hashLength-1] & 0x0f;
   unsigned long truncatedHash =
-    NSSwapBigLongToHost(*((unsigned long *)&ptr[offset])) & 0x7fffffff;
+    NSSwapBigIntToHost(*((unsigned long *)&ptr[offset])) & 0x7fffffff;
   unsigned long pinValue = truncatedHash % kPinModTable[digits];
 
   return [NSString stringWithFormat:@"%0*lu", digits, pinValue];
